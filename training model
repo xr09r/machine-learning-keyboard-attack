@@ -1,0 +1,37 @@
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+
+#load labels and features
+labels = np.load('labels_9.npy')
+features=np.load('mfcc32_features.npy')
+num_samples, num_frames, num_mfcc = features.shape
+X = features.reshape(num_samples * num_frames, num_mfcc)
+y = np.repeat(labels, num_frames)  # 重复标签以匹配样本数量
+
+assert X.shape[0] == y.shape[0]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2
+                                                 , random_state=42
+                                                      )
+
+# classifiers
+classifiers = {
+    "Decision Tree": DecisionTreeClassifier(criterion='gini',max_depth=200,random_state=0),
+    "Random Forest": RandomForestClassifier(n_estimators=200,min_samples_split=2,min_samples_leaf=1,max_features= 'sqrt',max_depth=20,bootstrap=False),
+    "KNN": KNeighborsClassifier(n_neighbors=8),
+    "SVM": SVC(kernel='rbf',C=1,gamma='scale'),
+    "Logistic Regression": LogisticRegression(penalty='l1',multi_class='ovr', solver='lbfgs', max_iter=1000)
+}
+
+for name, clf in classifiers.items():
+    # training
+    clf.fit(X_train, y_train),
+
+    accuracy = clf.score(X_test, y_test),
+
+    print(f"{name} - Accuracy on test set:", accuracy)
